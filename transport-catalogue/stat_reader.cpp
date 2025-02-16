@@ -6,50 +6,55 @@ namespace project
     {
         using namespace transport_catalogue;
         using namespace std;
-        void ParseAndPrintStat(const transport_catalogue::TransportCatalogue& tansport_catalogue, string_view request,
+        void ParseAndPrintStat(const transport_catalogue::TransportCatalogue& transport_catalogue, string_view request,
             ostream& output)
         {
-            vector<string_view> temp;
-            int i = request.find(' ', 0);
-            temp.push_back(request.substr(0, i));
-            temp.push_back(request.substr((i + 1), request.size() - i));
-
-
-            if (temp.at(0) == "Bus")
+            int temp=request.find(' ');
+            string_view first_word, second_word;
+            first_word = request.substr(0, temp);
+            second_word = request.substr(temp + 1, request.size() - 1);
+            if (first_word == "Bus")
             {
-                BusInfo result = tansport_catalogue.get_bus_info(string(temp.at(1)));
-                if (result.name == "")
+                optional<BusInfo> bus_info = transport_catalogue.get_bus_info(string(second_word));
+                output << "Bus " << second_word << ": ";
+                if (!bus_info)
                 {
-                    output << "Bus " << temp.at(1) << ": not found" << std::endl;
-                    return;
-                }
-                output << "Bus " << result.name << ": " << result.number_of_stops << " stops on route, " <<
-                    result.number_of_u_stops << " unique stops, " << setprecision(6) << result.route_lenght << " route length" << endl;
-            }
-            //Stop X : buses bus1 bus2
-            if (temp.at(0) == "Stop")
-            {
-                std::string name(temp.at(1));
-                StopInfo t = tansport_catalogue.get_stop_info(name);
-                if (t.exist == false)
-                {
-                    output << "Stop " << temp.at(1) << ": not found" << endl;
-                    return;
-                }
-                else if (t.buses.empty())
-                {
-                    output << "Stop " << temp.at(1) << ": no buses" << endl;
+                    //Bus X : not found
+                    output << "not found"<<endl;
                 }
                 else
                 {
-                    output << "Stop " << name << ": buses";
-                    for (auto& ch : t.buses)
-                    {
-                        output << " " << ch;
-                    }
-                    output << endl;
+                   // Bus X : R stops on route, U unique stops, L route length
+                    output << bus_info.value().stops << " stops on route, " << bus_info.value().u_stops <<
+                        " unique stops, " << setprecision(6) << bus_info.value().lenght << " route length"<<endl;
                 }
             }
+            if (first_word == "Stop")
+            {
+                optional<vector<string_view>> stop_info = transport_catalogue.get_stop_info(string(second_word));
+                output << "Stop " << second_word << ":";
+                if (!stop_info)
+                {
+                    output << " not found" << endl;
+                }
+                else
+                {
+                    if (stop_info.value().size() == 0)
+                    {
+                        output << " no buses" << endl;
+                    }
+                    else
+                    {
+                        output << " buses";
+                        for (const auto& ch : stop_info.value())
+                        {
+                            output << " " << ch;
+                        }
+                        output << endl;
+                    }
+                }
+            }
+            
         }
     }
 }
