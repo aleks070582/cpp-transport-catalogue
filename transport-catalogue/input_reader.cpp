@@ -126,9 +126,7 @@ namespace project
                 if (ch.command == "Bus")
                 {
                     string name = ch.id;
-
-                    catalogue.add_bus(name);
-                    catalogue.add_bus_route(name, std::move(ParseRoute(ch.description)));
+                    catalogue.add_bus(name, move(ParseRoute(ch.description)));
                 }
             }
 
