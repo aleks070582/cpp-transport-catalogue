@@ -2,136 +2,86 @@
 
 namespace project
 {
-	namespace transport_catalogue {
+	namespace transport_catalogue
+	{
 		using namespace std;
-		StopInfo TransportCatalogue::get_stop_info(string& name) const
-		{
-			StopInfo result;
-			result.exist = true;
-			auto temp = find_if(stops.begin(), stops.end(), [&name](const Stop& ch)
-				{
-					return ch.name == name;
-				});
-			if (temp == stops.end())
+
+		
+		const optional<vector<string_view>> TransportCatalogue::get_stop_info(const string& name) const
+		{ 
+			
+			auto p_stop = p_to_stop.find(name);
+			if (p_stop == p_to_stop.end())
 			{
-				result.exist = false;
-				return result;
+				return nullopt;
 			}
-
-			std::string* it = const_cast<string*>(&(temp->name));
-
-			for (const auto& ch : stops_to_bus.at(it))
+			vector<string_view> result{};
+			for (const auto ch : p_stop->second->buses)
 			{
-				result.buses.push_back(ch->name);
+				result.push_back(string_view(ch->name));
 			}
-
-			sort(result.buses.begin(), result.buses.end());
+			sort(result.begin(), result.end());
 			return result;
 		}
 
-		BusInfo TransportCatalogue::get_bus_info(const string& name) const
+		optional<BusInfo> TransportCatalogue::get_bus_info(const string& name) const
 		{
+			auto p_bus = p_to_bus.find(name);
+			if (p_bus==p_to_bus.end())
+			{
+				return nullopt;
+			}
 			BusInfo result;
-			auto temp = find_if(buses.begin(), buses.end(), [&name](const Bus& ch)
-				{
-					return ch.name == name;
-				});
-
-			if (temp == buses.end())
-			{
-				return BusInfo{};
-			}
-			string* it = const_cast<string*>(&(temp->name));
-			result.name = name;
-			result.number_of_stops = bus_to_stops.at(it).size();
-
-			result.number_of_u_stops = get_unique_stops(it);
-			result.route_lenght = calculate_route(it);
-			return result;
+			result.stops = p_bus->second->stops.size();
+			result.u_stops = unordered_set(p_bus->second->stops.begin(), p_bus->second->stops.end()).size();
+			result.lenght = calculate_path(&(*p_bus->second));
+			return result ;
 		}
 
-		void TransportCatalogue::add_bus(string& name)
+		void TransportCatalogue::add_stop(const string& name, const geo::Coordinates coord)
 		{
-			buses.push_back({ name });
-			auto p = find_bus(name);
-			bus_to_stops[&(p->name)];
+			
+			stops.emplace_back(Stop(name,coord));
+			auto p_stop = &stops.back();
+			p_to_stop[p_stop->name] = p_stop;
+
 		}
 
-		void TransportCatalogue::add_bus_route(string& name,vector<string_view>&& route)
+		void TransportCatalogue::add_bus(const string& name,const vector<string_view>&& route)
 		{
-			auto bus = find_bus(name);
-			for (auto ch : route)
+			buses.emplace_back(Bus(name));
+			auto p_bus = &buses.back();
+			p_to_bus[p_bus->name] = p_bus;
+			for (const auto& ch : route)
 			{
-				string temp(ch);
-				auto p_stop = find_stop(temp);
-				bool already_consist = false;
-				for (const Bus* ch : stops_to_bus.at(&(p_stop->name)))
+				auto p_stop = p_to_stop.at(string(ch));
+				p_bus->stops.push_back(p_stop);
+				bool already_exist = false;
+				for ( Bus* temp : p_stop->buses)
 				{
-					if (ch->name == bus->name)
+					if (temp->name == p_bus->name)
 					{
-						already_consist = true;
-					}
+						already_exist = true;
+				    }
 				}
-				if (already_consist == false)
+				if (already_exist == false)
 				{
-					stops_to_bus.at(&(p_stop->name)).push_back(bus);
-
+					p_stop->buses.push_back(p_bus);
 				}
-
-				bus_to_stops.at(&(bus->name)).push_back(p_stop);
 			}
 
-
 		}
 
-
-
-		void TransportCatalogue::add_stop(string& name, Coordinates coord)
+		double TransportCatalogue::calculate_path(const Bus* p_bus) const
 		{
-			stops.push_back({ name, coord });
-			auto p = find_stop(name);
-			stops_to_bus[&(p->name)];
-		}
-
-		double TransportCatalogue::calculate_route(string* p_name) const
-		{
-			double result = 0;
-			for (size_t i = 0; i < bus_to_stops.at(p_name).size() - 1; ++i)
+			double result=0;
+			for (size_t i = 0; i < p_bus->stops.size() - 1; ++i)
 			{
-				Coordinates first, second;
-				first = bus_to_stops.at(p_name).at(i)->coord;
-				second = bus_to_stops.at(p_name).at(i + 1)->coord;
-				result += ComputeDistance(first, second);
+				auto first_coord = p_bus->stops.at(i)->coord;
+				auto second_coord = p_bus->stops.at(i + 1)->coord;
+				result +=geo::ComputeDistance(first_coord, second_coord);
 			}
-
 			return result;
-		}
-
-
-		int TransportCatalogue::get_unique_stops(string* p_name) const
-		{
-
-			unordered_set <Stop*> temp({ bus_to_stops.at(p_name).begin(),bus_to_stops.at(p_name).end() });
-			return temp.size();
-		}
-
-		Bus* TransportCatalogue::find_bus(string& name)
-		{
-			auto it = std::find_if(buses.begin(), buses.end(), [&name](const Bus& ch)
-				{
-					return ch.name == name;
-				});
-
-			return &(*it);
-		}
-
-		Stop* TransportCatalogue::find_stop(string& name)
-		{
-			auto it = find_if(stops.begin(), stops.end(), [&name](Stop& ch)
-				{
-					return ch.name == name;
-				});
-			return &(*it);
 		}
 	}
 }
