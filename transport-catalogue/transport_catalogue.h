@@ -10,6 +10,7 @@
 #include"geo.h"
 #include<unordered_set>
 #include<optional>
+#include<set>
 namespace project
 {
 	
@@ -29,12 +30,12 @@ namespace project
 
 		{
 			Stop(const std::string&name_,const geo::Coordinates coord_) :name(name_),
-				coord(coord_),buses{}
+				coord(coord_)//,buses{}
 			{
 			};
 			std::string name;
 			geo::Coordinates coord;
-			std::vector<Bus*> buses;
+		//	std::vector<Bus*> buses;
 		};
 		struct Bus
 		{
@@ -48,16 +49,17 @@ namespace project
 		class TransportCatalogue
 		{
 		public:
-			const std::optional<std::vector<std::string_view>> get_stop_info(const std::string& name) const;
-		    std::optional<BusInfo> get_bus_info(const std::string& name) const;
-			void add_stop(const std::string& name, const geo::Coordinates coord);
-			void add_bus(const std::string& name, const std::vector<std::string_view>&& route);
+		 std::optional<std::set<std::string_view>> GetStopInfo(const std::string_view name) const;
+		 std::optional<BusInfo> GetBusInfo(const std::string_view name) const;
+			void AddStop(const std::string& name, const geo::Coordinates coord);
+			void AddBus(const std::string& name, const std::vector<std::string_view>&& route);
 		private:
-			double calculate_path(const Bus* p_bus) const;
+			double CalculatePath(const Bus* p_bus) const;
 			std::deque<Stop> stops;
 			std::deque<Bus> buses;
-			std::unordered_map<std::string, Bus*> p_to_bus;
-			std::unordered_map<std::string, Stop*> p_to_stop;
+			std::unordered_map<std::string_view, Bus*> p_to_bus;
+			std::unordered_map<std::string_view, Stop*> p_to_stop;
+			std::unordered_map < std::string_view, std::unordered_set<Bus*>> buses_at_stop;
 		};
 	}
 }
