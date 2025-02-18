@@ -8,10 +8,13 @@
 #include "geo.h"
 #include<iomanip>
 #include "transport_catalogue.h"
+#include<algorithm>
 namespace project
 {
     namespace input_reader
     {
+        void ReadInput(transport_catalogue::TransportCatalogue& transport_catalogue,std::istream& in);
+      
         struct CommandDescription {
             // Определяет, задана ли команда (поле command непустое)
             explicit operator bool() const {
@@ -33,7 +36,7 @@ namespace project
              * Парсит строку в структуру CommandDescription и сохраняет результат в commands_
              */
             void ParseLine(std::string_view line);
-
+           
             /**
              * Наполняет данными транспортный справочник, используя команды из commands_
              */
