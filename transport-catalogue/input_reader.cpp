@@ -11,7 +11,24 @@
 namespace project
 {
     namespace input_reader {
+
         using namespace std;
+
+        void ReadInput(transport_catalogue::TransportCatalogue& transport_catalogue, istream& in)
+        {
+            int base_request_count;
+            in >> base_request_count >> ws;
+
+            {
+               InputReader reader;
+                for (int i = 0; i < base_request_count; ++i) {
+                    string line;
+                    getline(in, line);
+                    reader.ParseLine(line);
+                }
+                reader.ApplyCommands(transport_catalogue);
+            }
+        }
 
        geo::Coordinates ParseCoordinates(std::string_view str) {
             static const double nan = std::nan("");
@@ -110,26 +127,22 @@ namespace project
 
         void InputReader::ApplyCommands([[maybe_unused]]transport_catalogue::TransportCatalogue& catalogue) const
         {
-            // переписать с использованием find
-            for (auto& ch : commands_)
-            {
-                if (ch.command == "Stop")
+            vector<CommandDescription> commands_no_const =move(commands_);
+            
+            auto it_end_first_part=partition(commands_no_const.begin(), commands_no_const.end(), []( CommandDescription& command)
                 {
-                    string name = ch.id;
-                    geo::Coordinates temp = ParseCoordinates(ch.description);
-                    catalogue.add_stop(name, temp);
-                }
-            }
-            for (const auto& ch : commands_)
-            {
-
-                if (ch.command == "Bus")
+                    return command.command == "Stop";
+                });
+                
+           for_each(commands_no_const.begin(), it_end_first_part, [&catalogue](const CommandDescription& command)
                 {
-                    string name = ch.id;
-                    catalogue.add_bus(name, move(ParseRoute(ch.description)));
-                }
-            }
-
+                    catalogue.AddStop(command.id, ParseCoordinates(command.description));
+                });
+            for_each( it_end_first_part,commands_no_const.end(), [&catalogue](const CommandDescription& command)
+                {
+                    catalogue.AddBus(command.id, move(ParseRoute(command.description)));
+                });
+                           
         }
     }
 }
