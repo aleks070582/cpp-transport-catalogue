@@ -7,7 +7,7 @@ namespace project
 		using namespace std;
 
 		
-		const optional<vector<string_view>> TransportCatalogue::get_stop_info(const string& name) const
+		 optional<set<string_view>> TransportCatalogue::GetStopInfo(const string_view name) const
 		{ 
 			
 			auto p_stop = p_to_stop.find(name);
@@ -15,64 +15,53 @@ namespace project
 			{
 				return nullopt;
 			}
-			vector<string_view> result{};
-			for (const auto ch : p_stop->second->buses)
+			 set<string_view> result{};
+			for ( const auto buses_ :buses_at_stop.at(name))
 			{
-				result.push_back(string_view(ch->name));
+				result.insert(buses_->name);
 			}
-			sort(result.begin(), result.end());
 			return result;
 		}
 
-		optional<BusInfo> TransportCatalogue::get_bus_info(const string& name) const
+		 optional<BusInfo> TransportCatalogue::GetBusInfo(const string_view name) const
 		{
 			auto p_bus = p_to_bus.find(name);
 			if (p_bus==p_to_bus.end())
 			{
 				return nullopt;
 			}
-			BusInfo result;
+		    BusInfo result{};
 			result.stops = p_bus->second->stops.size();
 			result.u_stops = unordered_set(p_bus->second->stops.begin(), p_bus->second->stops.end()).size();
-			result.lenght = calculate_path(&(*p_bus->second));
+			result.lenght = CalculatePath(&(*p_bus->second));
 			return result ;
 		}
 
-		void TransportCatalogue::add_stop(const string& name, const geo::Coordinates coord)
+		void TransportCatalogue::AddStop(const string& name, const geo::Coordinates coord)
 		{
 			
 			stops.emplace_back(Stop(name,coord));
 			auto p_stop = &stops.back();
 			p_to_stop[p_stop->name] = p_stop;
+			buses_at_stop.insert({ p_stop->name,{} });
 
 		}
 
-		void TransportCatalogue::add_bus(const string& name,const vector<string_view>&& route)
+		void TransportCatalogue::AddBus(const string& name,const vector<string_view>&& route)
 		{
 			buses.emplace_back(Bus(name));
 			auto p_bus = &buses.back();
 			p_to_bus[p_bus->name] = p_bus;
-			for (const auto& ch : route)
+			for (const auto& stops : route)
 			{
-				auto p_stop = p_to_stop.at(string(ch));
+				auto p_stop = p_to_stop.at(string(stops));
 				p_bus->stops.push_back(p_stop);
-				bool already_exist = false;
-				for ( Bus* temp : p_stop->buses)
-				{
-					if (temp->name == p_bus->name)
-					{
-						already_exist = true;
-				    }
-				}
-				if (already_exist == false)
-				{
-					p_stop->buses.push_back(p_bus);
-				}
+				buses_at_stop[p_stop->name].insert(p_bus);
 			}
 
 		}
 
-		double TransportCatalogue::calculate_path(const Bus* p_bus) const
+		double TransportCatalogue::CalculatePath(const Bus* p_bus) const
 		{
 			double result=0;
 			for (size_t i = 0; i < p_bus->stops.size() - 1; ++i)
