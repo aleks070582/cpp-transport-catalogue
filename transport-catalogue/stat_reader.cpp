@@ -6,17 +6,31 @@ namespace project
     {
         using namespace transport_catalogue;
         using namespace std;
+      
+        void ReadInput(std::istream& in, std::ostream& out, transport_catalogue::TransportCatalogue& transport_catalogue)
+        {
+            int stat_request_count;
+            in >> stat_request_count >> ws;
+            for (int i = 0; i < stat_request_count; ++i) {
+                string line;
+                getline(in, line);
+                ParseAndPrintStat(transport_catalogue, line, out);
+            }
+        }
+
         void ParseAndPrintStat(const transport_catalogue::TransportCatalogue& transport_catalogue, string_view request,
             ostream& output)
         {
             int temp=request.find(' ');
-            string_view first_word, second_word;
-            first_word = request.substr(0, temp);
-            second_word = request.substr(temp + 1, request.size() - 1);
-            if (first_word == "Bus")
+            string_view command, name;
+            command = request.substr(0, temp);
+            name = request.substr(temp + 1, request.size() - 1);
+            if (command == "Bus")
             {
-                optional<BusInfo> bus_info = transport_catalogue.get_bus_info(string(second_word));
-                output << "Bus " << second_word << ": ";
+                optional<BusInfo> bus_info=transport_catalogue.GetBusInfo (name);
+               
+              //  auto& bus_info_value = bus_info.value();
+                output << "Bus " << name << ": ";
                 if (!bus_info)
                 {
                     //Bus X : not found
@@ -24,15 +38,16 @@ namespace project
                 }
                 else
                 {
+                    auto&bus_info_value = bus_info.value();
                    // Bus X : R stops on route, U unique stops, L route length
-                    output << bus_info.value().stops << " stops on route, " << bus_info.value().u_stops <<
-                        " unique stops, " << setprecision(6) << bus_info.value().lenght << " route length"<<endl;
+                    output << bus_info_value.stops << " stops on route, " << bus_info_value.u_stops <<
+                        " unique stops, " << setprecision(6) << bus_info_value.lenght << " route length" << endl;
                 }
             }
-            if (first_word == "Stop")
+            if (command == "Stop")
             {
-                optional<vector<string_view>> stop_info = transport_catalogue.get_stop_info(string(second_word));
-                output << "Stop " << second_word << ":";
+                 optional<set<string_view>> stop_info=transport_catalogue.GetStopInfo(name);
+                output << "Stop " << name << ":";
                 if (!stop_info)
                 {
                     output << " not found" << endl;
