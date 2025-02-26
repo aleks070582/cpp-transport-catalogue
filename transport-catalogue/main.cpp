@@ -10,10 +10,9 @@ using namespace std;
 
 
 int main() {
+   
     project::transport_catalogue::TransportCatalogue catalogue;
-    fstream temp("tsB_case1_input.txt");
-    project::input_reader::ReadInput(catalogue, temp);
-
-    project::stat_reader::ReadInput(temp, cout, catalogue);
+    project::input_reader::ReadInput(catalogue, cin);
+    project::stat_reader::ReadInput(cin, cout, catalogue);
     
 }

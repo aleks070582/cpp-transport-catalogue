@@ -7,7 +7,7 @@ namespace project
         using namespace transport_catalogue;
         using namespace std;
       
-        void ReadInput(std::istream& in, std::ostream& out, transport_catalogue::TransportCatalogue& transport_catalogue)
+        void ReadInput(std::istream& in, std::ostream& out, const transport_catalogue::TransportCatalogue& transport_catalogue)
         {
             int stat_request_count;
             in >> stat_request_count >> ws;
@@ -38,10 +38,13 @@ namespace project
                 }
                 else
                 {
-                    auto&bus_info_value = bus_info.value();
+               //     auto&bus_info_value = bus_info.value();
+                    int i = 0;
                    // Bus X : R stops on route, U unique stops, L route length
-                    output << bus_info_value.stops << " stops on route, " << bus_info_value.u_stops <<
-                        " unique stops, " << setprecision(6) << bus_info_value.lenght << " route length" << endl;
+                    output << bus_info.value().stops << " stops on route, " << bus_info.value().u_stops <<
+                        " unique stops, "  <<bus_info.value().lenght << " route length, " << setprecision(6)<<
+                        bus_info.value().curvature << " curvature" << endl;
+                    int ic = 0;
                 }
             }
             if (command == "Stop")

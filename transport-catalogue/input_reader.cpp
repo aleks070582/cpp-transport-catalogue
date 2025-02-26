@@ -4,16 +4,16 @@
 #include <cassert>
 #include <iterator>
 
-/**
- * Парсит строку вида "10.123,  -30.1837" и возвращает пару координат (широта, долгота)
- */
+
 
 namespace project
 {
     namespace input_reader {
-
+        
         using namespace std;
-
+        pair<geo::Coordinates, optional<vector<pair<string_view, int>>>> ParseDescription(const string_view&command_description);
+        pair<string_view, int> ParseDistanceAndStop(const string_view& str);
+       
         void ReadInput(transport_catalogue::TransportCatalogue& transport_catalogue, istream& in)
         {
             int base_request_count;
@@ -30,20 +30,9 @@ namespace project
             }
         }
 
-       geo::Coordinates ParseCoordinates(std::string_view str) {
-            static const double nan = std::nan("");
-
-            auto not_space = str.find_first_not_of(' ');
-            auto comma = str.find(',');
-
-            if (comma == str.npos) {
-                return { nan, nan };
-            }
-
-            auto not_space2 = str.find_first_not_of(' ', comma + 1);
-
-            double lat = stod(std::string(str.substr(not_space, comma - not_space)));
-            double lng = stod(std::string(str.substr(not_space2)));
+       geo::Coordinates ParseCoordinates( const string_view& str,const string_view&str1) {
+            double lat = stod(string(str));
+            double lng = stod(string(str1));
 
             return { lat, lng };
         }
@@ -125,9 +114,10 @@ namespace project
             }
         }
 
+
         void InputReader::ApplyCommands([[maybe_unused]]transport_catalogue::TransportCatalogue& catalogue) const
         {
-            vector<CommandDescription> commands_no_const =move(commands_);
+            vector<CommandDescription> commands_no_const =commands_;
             
             auto it_end_first_part=partition(commands_no_const.begin(), commands_no_const.end(), []( CommandDescription& command)
                 {
@@ -136,7 +126,7 @@ namespace project
                 
            for_each(commands_no_const.begin(), it_end_first_part, [&catalogue](const CommandDescription& command)
                 {
-                    catalogue.AddStop(command.id, ParseCoordinates(command.description));
+                    catalogue.AddStop(command.id, ParseDescription(command.description));
                 });
             for_each( it_end_first_part,commands_no_const.end(), [&catalogue](const CommandDescription& command)
                 {
@@ -144,5 +134,35 @@ namespace project
                 });
                            
         }
-    }
+       
+        pair<geo::Coordinates, optional<vector<pair<string_view, int>>>> ParseDescription(const string_view& command_description)
+        {
+            pair<geo::Coordinates, optional<vector<pair<string_view, int>>>> result{};
+            const vector<string_view> parsed_description = Split(command_description, ',');
+            result.first = ParseCoordinates(parsed_description[0], parsed_description[1]);
+
+            // Если есть информация о расстояниях до остановок
+            if (parsed_description.size() >= 3) {
+                vector<pair<string_view, int>> distances;
+                for (size_t i = 2; i < parsed_description.size(); ++i) {
+                    distances.push_back(ParseDistanceAndStop(parsed_description.at(i)));
+                }
+                result.second = distances; // Присваиваем вектор в optional
+            }
+            else {
+                result.second = nullopt;
+            }
+            return result;
+        }
+
+       pair<string_view, int> ParseDistanceAndStop(const string_view& str)
+       {
+           
+           string_view  result = str.substr(0, str.find_last_not_of('m'));
+           int distance = stoi(string(result));
+           result = str.substr(str.find("to") + 3, str.size() - (str.find("to")+3));  
+           return {result,distance};
+       }
+
+}
 }

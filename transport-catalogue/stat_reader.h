@@ -10,12 +10,10 @@
 namespace project {
     namespace stat_reader
     {
-        void ReadInput(std::istream& in, std::ostream &out, transport_catalogue::TransportCatalogue&
+        void ReadInput(std::istream& in, std::ostream &out, const transport_catalogue::TransportCatalogue&
             transport_catalogue);
 
         void ParseAndPrintStat(const transport_catalogue::TransportCatalogue& transport_catalogue, std::string_view request,
-            std::ostream& output);
-
-        
+            std::ostream& output);   
     }
 }
