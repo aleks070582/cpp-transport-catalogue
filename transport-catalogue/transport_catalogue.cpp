@@ -4,19 +4,23 @@ namespace project {
     namespace transport_catalogue {
         using namespace std;
 
-        optional<set<string_view>> TransportCatalogue::GetStopInfo(const string_view name) const {
+        optional<const set<const Bus*, BusPointerComparator>*> TransportCatalogue::GetStopInfo(const string_view name) const {
             auto p_stop = p_to_stop.find(name);
             if (p_stop == p_to_stop.end()) {
                 return nullopt;
             }
-            if (!buses_at_stop.contains(name)) {
-                return set<string_view>{}; 
+
+            if (!buses_at_stop.contains(name))
+            {
+             
+                return   &nullbus;
             }
-            set<string_view> result;
-            for (const auto bus_ptr : buses_at_stop.at(name)) {
-                result.insert(bus_ptr->name);
-            }
-            return result;
+          //  set<string_view> result;
+          //  for (const auto bus_ptr : buses_at_stop.at(name)) {
+           //     result.insert(bus_ptr->name);
+           // }
+           // auto it = &(buses_at_stop.at(name));
+            return &(buses_at_stop.at(name));
         }
 
         optional<BusInfo> TransportCatalogue::GetBusInfo(const string_view name) const {
@@ -33,21 +37,17 @@ namespace project {
             return result;
         }
 
-        void TransportCatalogue::AddStop(const string& name, const pair<geo::Coordinates, optional<vector<pair<string_view, int>>>>& stop_description) {
-            Stop* p_stop = nullptr;
+        void TransportCatalogue::AddStop(const string& name, geo::Coordinates coord)
+        {
             if (!p_to_stop.contains(name)) {
-                stops.push_back(Stop(name, stop_description.first));
-                p_stop = &stops.back();
+                stops.push_back(Stop(name, coord));
+               Stop* p_stop = &stops.back();
                 p_to_stop[p_stop->name] = p_stop;
                 buses_at_stop.insert({ p_stop->name, {} });
             }
-            else {
-                p_to_stop[name]->coord = stop_description.first;
-                p_stop = p_to_stop[name];
-            }
-
-            if (stop_description.second) {
-                AddStops(p_stop, stop_description.second.value());
+            else 
+            {
+                p_to_stop[name]->coord = coord;
             }
         }
 
@@ -63,19 +63,25 @@ namespace project {
             }
         }
 
-        void TransportCatalogue::AddStops(const Stop* stop_, const vector<pair<string_view, int>>& stops_and_distance) {
-            for (const pair<string_view, int>& stop : stops_and_distance) {
-                if (p_to_stop.contains(stop.first))
+        void TransportCatalogue::AddStopAndDistance(const string&first_stop,const string&second_stop,int distance )
+        {
+            
+            if (!p_to_stop.contains(first_stop))
+            {
+                stops.push_back(Stop{ first_stop,{} });
+                p_to_stop[first_stop] = &stops.back();
+            }
+                if (p_to_stop.contains(second_stop))
                 {
-                    distance_between_stops.insert({ { stop_, p_to_stop[stop.first] }, stop.second });
+                    distance_between_stops.insert({ {p_to_stop[first_stop], p_to_stop[second_stop]}, distance});
                 }
                 else {
-                    stops.push_back(Stop(string(stop.first)));
+                    stops.push_back(second_stop);
                     auto pointer_to_stop = &(stops.back());
                     p_to_stop[pointer_to_stop->name] = pointer_to_stop;
-                    distance_between_stops.insert({ { stop_, pointer_to_stop }, stop.second });
+                    distance_between_stops.insert({ { p_to_stop[first_stop], pointer_to_stop}, distance});
                 }
-            }
+            
         }
 
         double TransportCatalogue::CalculateGeographicPath(const Bus* p_bus) const {

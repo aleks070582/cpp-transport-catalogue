@@ -11,9 +11,14 @@ namespace project
     namespace input_reader {
         
         using namespace std;
-        pair<geo::Coordinates, optional<vector<pair<string_view, int>>>> ParseDescription(const string_view&command_description);
-        pair<string_view, int> ParseDistanceAndStop(const string_view& str);
-       
+
+        struct ParsedStopFromDescription
+        {
+            ParsedStopFromDescription() : coord({}), stops_and_distance({}) {};
+            geo::Coordinates coord;
+            unordered_map<string_view, int> stops_and_distance;
+        };
+        ParsedStopFromDescription ParseDescription(const string_view&command_description);
         void ReadInput(transport_catalogue::TransportCatalogue& transport_catalogue, istream& in)
         {
             int base_request_count;
@@ -117,7 +122,8 @@ namespace project
 
         void InputReader::ApplyCommands([[maybe_unused]]transport_catalogue::TransportCatalogue& catalogue) const
         {
-            vector<CommandDescription> commands_no_const =commands_;
+            
+            vector<CommandDescription> commands_no_const(commands_);
             
             auto it_end_first_part=partition(commands_no_const.begin(), commands_no_const.end(), []( CommandDescription& command)
                 {
@@ -126,7 +132,16 @@ namespace project
                 
            for_each(commands_no_const.begin(), it_end_first_part, [&catalogue](const CommandDescription& command)
                 {
-                    catalogue.AddStop(command.id, ParseDescription(command.description));
+                   ParsedStopFromDescription temp = ParseDescription(command.description);
+                   catalogue.AddStop(command.id, temp.coord);
+                   if (!temp.stops_and_distance.empty())
+                   {
+                       for_each(temp.stops_and_distance.begin(), temp.stops_and_distance.end(), [&command, &catalogue]
+                       (const pair<string_view, int>& ch)
+                           {
+                               catalogue.AddStopAndDistance(command.id, string(ch.first), ch.second);
+                           });
+                   }
                 });
             for_each( it_end_first_part,commands_no_const.end(), [&catalogue](const CommandDescription& command)
                 {
@@ -135,34 +150,30 @@ namespace project
                            
         }
        
-        pair<geo::Coordinates, optional<vector<pair<string_view, int>>>> ParseDescription(const string_view& command_description)
+       
+        ParsedStopFromDescription ParseDescription(const string_view& command_description)
         {
-            pair<geo::Coordinates, optional<vector<pair<string_view, int>>>> result{};
-            const vector<string_view> parsed_description = Split(command_description, ',');
-            result.first = ParseCoordinates(parsed_description[0], parsed_description[1]);
+            ParsedStopFromDescription result;
+           const  vector<string_view> parsed_description (move(Split(command_description, ',')));
+            result.coord = ParseCoordinates(parsed_description[0], parsed_description[1]);
+            if (parsed_description.size() >= 3) 
+             {
+                
+                for (size_t i = 2; i < parsed_description.size(); ++i)
+                {
 
-            // Если есть информация о расстояниях до остановок
-            if (parsed_description.size() >= 3) {
-                vector<pair<string_view, int>> distances;
-                for (size_t i = 2; i < parsed_description.size(); ++i) {
-                    distances.push_back(ParseDistanceAndStop(parsed_description.at(i)));
+                  const  string_view& str = parsed_description[i];
+                    string_view  temp = str.substr(0, str.find_last_not_of('m'));
+                    int distance = stoi(string(temp));
+                    int size_to_stop = str.find("to")+3;//прибавляем к положению to 3 чтобы получить позицию остановки 
+                    temp = str.substr(size_to_stop, str.size() - size_to_stop);
+                    result.stops_and_distance.insert({temp,distance});
                 }
-                result.second = distances; // Присваиваем вектор в optional
+               
             }
-            else {
-                result.second = nullopt;
-            }
+            
             return result;
         }
-
-       pair<string_view, int> ParseDistanceAndStop(const string_view& str)
-       {
-           
-           string_view  result = str.substr(0, str.find_last_not_of('m'));
-           int distance = stoi(string(result));
-           result = str.substr(str.find("to") + 3, str.size() - (str.find("to")+3));  
-           return {result,distance};
-       }
 
 }
 }

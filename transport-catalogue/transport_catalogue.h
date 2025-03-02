@@ -25,6 +25,8 @@ namespace project {
             }
         };
 
+        
+
         struct BusInfo {
             unsigned int stops;
             unsigned int u_stops;
@@ -48,14 +50,21 @@ namespace project {
             std::vector<Stop*> stops;
         };
 
+        struct BusPointerComparator {
+            bool operator ()(const Bus* first, const Bus* second) const
+            {
+                return first->name < second->name;
+            }
+        };
         class TransportCatalogue {
         public:
-            std::optional<std::set<std::string_view>> GetStopInfo(const std::string_view name) const;
+            std::optional<const std::set<const Bus*, BusPointerComparator>*> GetStopInfo(const std::string_view name) const;
             std::optional<BusInfo> GetBusInfo(const std::string_view name) const;
-            void AddStop(const std::string& name, const std::pair<geo::Coordinates, std::optional<std::vector<std::pair<std::string_view, int>>>>& stop_description);
+            void AddStop(const std::string& name, const geo::Coordinates coord);
             void AddBus(const std::string& name, const std::vector<std::string_view>&& route);
+            void AddStopAndDistance(const std::string& stop1,const std::string&stop2,int distance);
         private:
-            void AddStops(const Stop* stop, const std::vector<std::pair<std::string_view, int>>& stops_and_distance);
+            
             double CalculateGeographicPath(const Bus* p_bus) const;
             int CalculatePath(const Bus* p_bus) const;
             std::deque<Stop> stops;
@@ -63,7 +72,8 @@ namespace project {
             std::unordered_map<std::string_view, Bus*> p_to_bus;
             std::unordered_map<std::string_view, Stop*> p_to_stop;
             std::unordered_map<std::pair<const Stop*, const Stop*>, int, PointerPairHash> distance_between_stops;
-            std::unordered_map<std::string_view, std::unordered_set<Bus*>> buses_at_stop;
+            std::unordered_map<std::string_view, std::set<const Bus*,BusPointerComparator>> buses_at_stop;
+           const std::set<const Bus*, BusPointerComparator> nullbus{};
         };
     }
 }

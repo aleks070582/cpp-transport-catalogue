@@ -1,5 +1,6 @@
 #include "stat_reader.h"
 #include<iomanip>
+
 namespace project 
 {
     namespace stat_reader
@@ -27,9 +28,8 @@ namespace project
             name = request.substr(temp + 1, request.size() - 1);
             if (command == "Bus")
             {
-                optional<BusInfo> bus_info=transport_catalogue.GetBusInfo (name);
-               
-              //  auto& bus_info_value = bus_info.value();
+               const optional<BusInfo> bus_info=transport_catalogue.GetBusInfo (name);
+                       
                 output << "Bus " << name << ": ";
                 if (!bus_info)
                 {
@@ -38,18 +38,16 @@ namespace project
                 }
                 else
                 {
-               //     auto&bus_info_value = bus_info.value();
-                    int i = 0;
+                  const auto&bus_info_value = bus_info.value();    
                    // Bus X : R stops on route, U unique stops, L route length
-                    output << bus_info.value().stops << " stops on route, " << bus_info.value().u_stops <<
-                        " unique stops, "  <<bus_info.value().lenght << " route length, " << setprecision(6)<<
-                        bus_info.value().curvature << " curvature" << endl;
-                    int ic = 0;
+                    output << bus_info_value.stops << " stops on route, " << bus_info_value.u_stops <<
+                        " unique stops, "  <<bus_info_value.lenght << " route length, " << setprecision(6)<<
+                        bus_info_value.curvature << " curvature" << endl;
                 }
             }
             if (command == "Stop")
             {
-                 optional<set<string_view>> stop_info=transport_catalogue.GetStopInfo(name);
+                optional<const set<const Bus*, BusPointerComparator>*> stop_info=transport_catalogue.GetStopInfo(name);
                 output << "Stop " << name << ":";
                 if (!stop_info)
                 {
@@ -57,16 +55,16 @@ namespace project
                 }
                 else
                 {
-                    if (stop_info.value().size() == 0)
+                    if (stop_info.value()->empty())
                     {
                         output << " no buses" << endl;
                     }
                     else
                     {
                         output << " buses";
-                        for (const auto& ch : stop_info.value())
+                        for (const auto&ch : *stop_info.value())
                         {
-                            output << " " << ch;
+                            output << " " << ch->name;
                         }
                         output << endl;
                     }
