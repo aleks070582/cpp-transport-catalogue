@@ -20,29 +20,27 @@ namespace SphereProjector {
 
     public:
         // points_begin и points_end задают начало и конец интервала элементов geo::Coordinates
-        SphereProjector(std::deque<Stop>::const_iterator points_begin, std::deque<Stop>::const_iterator points_end,
-            double max_width, double max_height, double padding)
+        SphereProjector(const std::vector<const Stop*>& stops,  double max_width, double max_height, double padding)
             : padding_(padding) //
         {
             // Если точки поверхности сферы не заданы, вычислять нечего
-            if (points_begin == points_end) {
+            if (stops.begin()==stops.end()) {
                 return;
             }
 
             // Находим точки с минимальной и максимальной долготой
-            const auto [left_it, right_it] = std::minmax_element(
-                points_begin, points_end,
-                [](const Stop&lhs, const Stop&rhs) { 
-                    return lhs.coord.lng < rhs.coord.lng; });
-            min_lon_ = left_it->coord.lng;
-            const double max_lon = right_it->coord.lng;
+            const auto [left_it, right_it] = std::minmax_element(stops.begin(),stops.end(),
+                [](const Stop* lhs, const Stop* rhs) { 
+                    return lhs->coord.lng< rhs->coord.lng; });
+            
+            min_lon_ = (*left_it)->coord.lng;
+            const double max_lon = (*right_it)->coord.lng;
 
             // Находим точки с минимальной и максимальной широтой
-            const auto [bottom_it, top_it] = std::minmax_element(
-                points_begin, points_end,
-                [](const Stop& lhs, const Stop& rhs) { return lhs.coord.lat < rhs.coord.lat; });
-            const double min_lat = bottom_it->coord.lat;
-            max_lat_ = top_it->coord.lat;
+            const auto [bottom_it, top_it] = std::minmax_element(stops.begin(),stops.end(),
+                [](const Stop* lhs, const Stop* rhs) { return lhs->coord.lat < rhs->coord.lat; });
+            const double min_lat = (*bottom_it)->coord.lat;
+            max_lat_ = (*top_it)->coord.lat;
 
             // Вычисляем коэффициент масштабирования вдоль координаты x
             std::optional<double> width_zoom;
@@ -94,8 +92,8 @@ namespace SphereProjector {
         const  SphereProjector::SphereProjector& projector);
     void DrawAllBusRoute(const RenderSettings& render_settings, const TransportCatalogue& catalog, std::ostream& out);
     void ApplyRenderSettingsToBusRoute(std::vector<svg::Text>& text, int number, const RenderSettings& render_settings);
-    std::vector<svg::Text> DrawStopName(const Stop& stop, const RenderSettings& render_settings,
+    std::vector<svg::Text> DrawStopName(const Stop* stop, const RenderSettings& render_settings,
         const SphereProjector::SphereProjector& proj);
 
-    svg::Circle DrawStop(const Stop& stop, const RenderSettings& render_settings, const SphereProjector::SphereProjector& proj);
+    svg::Circle DrawStop(const Stop* stop, const RenderSettings& render_settings, const SphereProjector::SphereProjector& proj);
     svg::Polyline BusRouteToPolyline(std::vector<geo::Coordinates>& points, int number, const RenderSettings& render_settings);

@@ -14,8 +14,8 @@
          * Выполнить запросы к справочнику, находящиеся в массива "stat_requests", построив JSON-массив
          * с ответами Вывести в stdout ответы в виде JSON
          */
-       // fstream temp("111.json");
-        json::Document document = json::Load(cin);
+        fstream temp("s10_final_opentest_3.json");
+        json::Document document = json::Load(temp);
         transport_catalogue::TransportCatalogue catalog;
         ParseRequestJsonDocument(document,catalog);    
         ParseAndPrintStatJsonDocument(document, catalog, cout);

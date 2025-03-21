@@ -13,12 +13,6 @@ std::vector<geo::Coordinates> GetRouteByPoint(const TransportCatalogue& catalog,
 		stop_temp.lat = temp.x;
 		stops_coord.push_back(stop_temp);
 	}
-
-//	for (auto& stop : stops_coord) {
-//		svg::Point temp = projector(stop);
-//		stop.lng = temp.y;
-//		stop.lat = temp.x;
-//	}
 	return stops_coord;
 }
 
@@ -27,7 +21,6 @@ std::vector<svg::Text> DrawBusText(std::string_view bus_name, const TransportCat
 
 	const std::vector<std::string_view> stops_name = catalog.GetFinalStops(bus_name);
 	std::vector<svg::Text> text;
-//	assert(stops_name.empty());
 	for (short int i = 0; i < stops_name.size(); ++i) {
 		svg::Point coord = projector(catalog.GetStopCoordinates(stops_name.at(i)));
 		svg::Text temp;
@@ -42,20 +35,11 @@ std::vector<svg::Text> DrawBusText(std::string_view bus_name, const TransportCat
 void DrawAllBusRoute(const RenderSettings& render_settings, const TransportCatalogue& catalog, std::ostream& out)
 {
 	svg::Document map;
-	/// переделать без копирования ввести функцию возвращающую мин макс в транспорт каталог
-	 auto all_stop = catalog.GetAllStop();
-	 std::erase_if(all_stop, [&catalog](Stop value) {
-		 if (catalog.GetStopInfo(value.name) && !catalog.GetStopInfo(value.name).value()->empty()) {
-			 return false;
-		 }
-		 else {
-			 return true;
-		 }
-		 });
-	SphereProjector::SphereProjector projector(all_stop.begin(),all_stop.end(), render_settings.width,
+	auto all_stop = catalog.GetAllStopWithBus();
+	SphereProjector::SphereProjector projector(all_stop, render_settings.width,
 		render_settings.height, render_settings.padding);
 	std::set<std::string_view> buses = catalog.GetAllBusesName();
-
+	assert(!all_stop.empty());
 	int number = 0;
 	for (const auto& bus : buses) {
 		std::vector<geo::Coordinates> coordinates = GetRouteByPoint(catalog, bus,projector);
@@ -72,14 +56,16 @@ void DrawAllBusRoute(const RenderSettings& render_settings, const TransportCatal
 		}
 		++number;
 	}
-	std::sort(all_stop.begin(), all_stop.end(), [](Stop& lhs, Stop& rhs) {
-		return lhs.name < rhs.name;
+	std::sort(all_stop.begin(), all_stop.end(), [](const Stop* lhs, const Stop* rhs) {
+		return lhs->name < rhs->name;
 		});
 	for (const auto& stop : all_stop) {
+		assert(stop != nullptr);
 		svg::Circle temp = DrawStop(stop, render_settings,projector);
 		map.Add(temp);
 	}
 	for (const auto& stop:all_stop) {
+		assert(stop != nullptr);
 		std::vector<svg::Text> temp = DrawStopName(stop, render_settings, projector);
 		map.Add(temp.at(0));
 		map.Add(temp.at(1));
@@ -88,11 +74,11 @@ void DrawAllBusRoute(const RenderSettings& render_settings, const TransportCatal
 	map.Render(out);
 }
 
-std::vector<svg::Text> DrawStopName(const Stop& stop, const RenderSettings& render_settings, const SphereProjector::SphereProjector& proj) {
+std::vector<svg::Text> DrawStopName(const Stop* stop, const RenderSettings& render_settings, const SphereProjector::SphereProjector& proj) {
 	std::vector<svg::Text> texts(2);
-	std::for_each(texts.begin(), texts.end(),[&render_settings, &proj,&stop](svg::Text& text){
-		text.SetData(stop.name);
-		text.SetPosition(proj(stop.coord));
+	std::for_each(texts.begin(), texts.end(),[&render_settings, &proj,stop](svg::Text& text){
+		text.SetData(stop->name);
+		text.SetPosition(proj(stop->coord));
 		text.SetOffset({ render_settings.stop_label_offset.first,render_settings.stop_label_offset.second });
 		text.SetFontSize(render_settings.stop_label_font_size);
 		text.SetFontFamily("Verdana");
@@ -107,9 +93,9 @@ std::vector<svg::Text> DrawStopName(const Stop& stop, const RenderSettings& rend
 	text->SetFillColor("black");
 	return texts;
 }
-svg::Circle DrawStop(const Stop& stop, const RenderSettings& render_settings,const SphereProjector::SphereProjector&proj) {
+svg::Circle DrawStop(const Stop* stop, const RenderSettings& render_settings,const SphereProjector::SphereProjector&proj) {
 	svg::Circle circle;
-	circle.SetCenter(proj(stop.coord));
+	circle.SetCenter(proj(stop->coord));
 	circle.SetRadius(render_settings.stop_radius);
 	circle.SetFillColor("white");
 	return circle;

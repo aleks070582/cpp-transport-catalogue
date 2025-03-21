@@ -47,7 +47,7 @@ namespace transport_catalogue {
     };
 
     struct Bus {
-        Bus(const std::string& _name) : name(_name), stops{} {}
+        Bus(const std::string& _name) : name(_name), stops{},is_round_trip(false) {}
         std::string name;
         std::vector<const Stop*> stops;
         bool is_round_trip;
@@ -71,6 +71,7 @@ namespace transport_catalogue {
         const std::vector<const Stop*>& GetStops(std::string_view bus)const;
         std::deque<Stop> GetAllStop()const ;
         std::vector<std::string_view> GetFinalStops(std::string_view bus_name) const;
+        std::vector<const Stop*> GetAllStopWithBus() const;
       
     private:
 

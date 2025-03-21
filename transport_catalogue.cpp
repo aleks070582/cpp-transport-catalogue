@@ -125,6 +125,19 @@ namespace transport_catalogue {
           return { {bus->stops.at(0)->name},{bus->stops.at((bus->stops.size() + 1) / 2-1)->name }};
       }
 
+      vector<const Stop*> TransportCatalogue::GetAllStopWithBus() const
+      {
+          vector<const Stop*> result{};
+          result.reserve(p_to_stop.size());
+          for (const auto& stop : p_to_stop) {
+              string_view name = stop.first;
+              if (buses_at_stop.contains(name)&&!buses_at_stop.at(name).empty()) {
+                  result.push_back(stop.second);
+              }
+              }
+          return result;
+      }
+
     double TransportCatalogue::CalculateGeographicPath(const Bus* p_bus) const {
         if (p_bus->stops.size() < 2) {
             return 0;
