@@ -7,7 +7,7 @@
 #include"algorithm"
 #include<utility>
 
-using namespace transport_catalogue;
+
 extern struct RenderSettings render_settings;
 namespace SphereProjector {
     using namespace transport_catalogue;
@@ -88,12 +88,12 @@ namespace SphereProjector {
 
     std::vector<geo::Coordinates> GetRouteByPoint(const transport_catalogue::TransportCatalogue& catalog, std::string_view bus_name,
         const SphereProjector::SphereProjector& projector);
-    std::vector<svg::Text> DrawBusText(std::string_view bus_name, const TransportCatalogue& catalog,
+    std::vector<svg::Text> DrawBusText(std::string_view bus_name, const transport_catalogue::TransportCatalogue& catalog,
         const  SphereProjector::SphereProjector& projector);
-    void DrawAllBusRoute(const RenderSettings& render_settings, const TransportCatalogue& catalog, std::ostream& out);
+    void DrawAllBusRoute(const RenderSettings& render_settings, const transport_catalogue::TransportCatalogue& catalog, std::ostream& out);
     void ApplyRenderSettingsToBusRoute(std::vector<svg::Text>& text, int number, const RenderSettings& render_settings);
-    std::vector<svg::Text> DrawStopName(const Stop* stop, const RenderSettings& render_settings,
+    std::vector<svg::Text> DrawStopName(const transport_catalogue::Stop* stop, const RenderSettings& render_settings,
         const SphereProjector::SphereProjector& proj);
 
-    svg::Circle DrawStop(const Stop* stop, const RenderSettings& render_settings, const SphereProjector::SphereProjector& proj);
+    svg::Circle DrawStop(const transport_catalogue::Stop* stop, const RenderSettings& render_settings, const SphereProjector::SphereProjector& proj);
     svg::Polyline BusRouteToPolyline(std::vector<geo::Coordinates>& points, int number, const RenderSettings& render_settings);

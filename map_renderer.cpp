@@ -1,5 +1,6 @@
 #include "map_renderer.h"
 
+using namespace transport_catalogue;
 std::vector<geo::Coordinates> GetRouteByPoint(const TransportCatalogue& catalog, std::string_view bus_name,
 	const SphereProjector::SphereProjector&projector)
 {

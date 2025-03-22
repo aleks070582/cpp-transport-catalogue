@@ -11,9 +11,7 @@
 #include<utility>
 #include<sstream>
 
-using namespace json;
-using namespace transport_catalogue;
-using namespace geo;
+
 struct StatRequest {
 	StatRequest() :id(0),type({}), name({}) {};
 	int id;
@@ -39,12 +37,12 @@ struct RenderSettings {
 	std::vector<svg::Color> color_palette;
 
 };
-using StopInfo = const std::set<const Bus*, BusPointerComparator>*;
-Node SvgToJson(const json::Document& document, const transport_catalogue::TransportCatalogue& catalog,int id);
-svg::Color ParseColorFromJson(const Node& node);
-RenderSettings ParsingJsonAndGetSetting(const Document& document);
-Node BusInfoToJson(const std::optional<BusInfo>& bus_info, int id);
-Node StopInfoToJson(const std::optional<StopInfo>& stop, int id);
-std::vector<StatRequest> ParseStatJsonDocument(const Document& document);
-void ParseAndPrintStatJsonDocument(const Document& document, const TransportCatalogue& catalog,std::ostream& out);
-void ParseRequestJsonDocument(const Document& document,TransportCatalogue& catalog);
+using StopInfo = const std::set<const transport_catalogue::Bus*,transport_catalogue::BusPointerComparator>*;
+json::Node SvgToJson(const json::Document& document, const transport_catalogue::TransportCatalogue& catalog,int id);
+svg::Color ParseColorFromJson(const json::Node& node);
+RenderSettings ParsingJsonAndGetSetting(const json::Document& document);
+json::Node BusInfoToJson(const std::optional<transport_catalogue::BusInfo>& bus_info, int id);
+json::Node StopInfoToJson(const std::optional< StopInfo>& stop, int id);
+std::vector<StatRequest> ParseStatJsonDocument(const json::Document& document);
+void ParseAndPrintStatJsonDocument(const json::Document& document, const transport_catalogue:: TransportCatalogue& catalog,std::ostream& out);
+void ParseRequestJsonDocument(const json::Document& document,transport_catalogue::TransportCatalogue& catalog);

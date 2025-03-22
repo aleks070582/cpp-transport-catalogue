@@ -1,5 +1,6 @@
 #include "json_reader.h"
-
+using namespace transport_catalogue;
+using namespace json;
 std::vector<StatRequest> ParseStatJsonDocument(const Document& document) {
 	assert(document.GetRoot().IsMap());
 	const Node requests = document.GetRoot().AsMap().find("stat_requests")->second;
