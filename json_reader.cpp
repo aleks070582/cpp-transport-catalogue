@@ -41,27 +41,27 @@ svg::Color ParseColorFromJson(const Node& node)
 RenderSettings ParsingJsonAndGetSetting(const Document& document){
 	assert(document.GetRoot().IsMap());
 	assert(document.GetRoot().AsMap().contains("render_settings"));
-	RenderSettings render_settings;
+	RenderSettings render_set;
 	const Dict dict=document.GetRoot().AsMap().find("render_settings")->second.AsMap();
-	render_settings.width = dict.find("width")->second.AsDouble();
-	render_settings.height = dict.find("height")->second.AsDouble();
-	render_settings.bus_label_font_size = dict.find("bus_label_font_size")->second.AsInt();
+	render_set.width = dict.find("width")->second.AsDouble();
+	render_set.height = dict.find("height")->second.AsDouble();
+	render_set.bus_label_font_size = dict.find("bus_label_font_size")->second.AsInt();
 	const Array* temp = &dict.find("bus_label_offset")->second.AsArray();
-	render_settings.bus_label_offset = { temp->at(0).AsDouble(),temp->at(1).AsDouble() };
-	render_settings.line_width = dict.find("line_width")->second.AsDouble();
-	render_settings.padding = dict.find("padding")->second.AsDouble();
-	render_settings.stop_label_font_size = dict.find("stop_label_font_size")->second.AsInt();
-	render_settings.stop_radius = dict.find("stop_radius")->second.AsDouble();
+	render_set.bus_label_offset = { temp->at(0).AsDouble(),temp->at(1).AsDouble() };
+	render_set.line_width = dict.find("line_width")->second.AsDouble();
+	render_set.padding = dict.find("padding")->second.AsDouble();
+	render_set.stop_label_font_size = dict.find("stop_label_font_size")->second.AsInt();
+	render_set.stop_radius = dict.find("stop_radius")->second.AsDouble();
 	temp = &dict.find("stop_label_offset")->second.AsArray();
-	render_settings.stop_label_offset = { temp->at(0).AsDouble(),temp->at(1).AsDouble() };
-	render_settings.underlayer_width = dict.find("underlayer_width")->second.AsDouble();
-	render_settings.underlayer_color = ParseColorFromJson(dict.find("underlayer_color")->second);
+	render_set.stop_label_offset = { temp->at(0).AsDouble(),temp->at(1).AsDouble() };
+	render_set.underlayer_width = dict.find("underlayer_width")->second.AsDouble();
+	render_set.underlayer_color = ParseColorFromJson(dict.find("underlayer_color")->second);
 	
 	temp = &dict.find("color_palette")->second.AsArray();
 	for (const auto& color : *temp) {
-		render_settings.color_palette.push_back(ParseColorFromJson(color));
+		render_set.color_palette.push_back(ParseColorFromJson(color));
 	}
-	return render_settings;
+	return render_set;
 }
 
 Node BusInfoToJson( const std::optional<BusInfo>& bus_info,int id) {
@@ -128,9 +128,9 @@ void ParseAndPrintStatJsonDocument(const json::Document& document, const Transpo
 }
 
 Node SvgToJson(const json::Document& document,const transport_catalogue::TransportCatalogue& catalog,int id) {
-	const RenderSettings render_settings = ParsingJsonAndGetSetting(document);
+	const RenderSettings render_set = ParsingJsonAndGetSetting(document);
 	std::ostringstream temp;
-	DrawAllBusRoute(render_settings, catalog,temp);
+	DrawAllBusRoute(render_set, catalog,temp);
 	Dict dict;
 	dict["request_id"] = id;
 	dict["map"] = temp.str();
