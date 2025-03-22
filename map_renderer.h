@@ -8,7 +8,26 @@
 #include<utility>
 
 
-extern struct RenderSettings render_settings;
+
+struct RenderSettings {
+    RenderSettings() :width(0.0), height(0.0), padding(0.0), line_width(0.0), stop_radius(0.0), bus_label_font_size(0),
+        bus_label_offset({ 0.0,0.0 }), stop_label_font_size(0), stop_label_offset({ 0.0,0.0 }),
+        underlayer_color(std::monostate{}), underlayer_width(0.0), color_palette({}) {
+    };
+    double width;
+    double height;
+    double padding;
+    double line_width;
+    double stop_radius;
+    int bus_label_font_size;
+    std::pair<double, double> bus_label_offset;
+    int stop_label_font_size;
+    std::pair<double, double> stop_label_offset;
+    svg::Color underlayer_color;
+    double underlayer_width;
+    std::vector<svg::Color> color_palette;
+
+};
 namespace SphereProjector {
     using namespace transport_catalogue;
     inline const double EPSILON = 1e-6;

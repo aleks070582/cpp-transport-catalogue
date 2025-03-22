@@ -39,7 +39,7 @@ svg::Color ParseColorFromJson(const Node& node)
 	return svg::Color();
 }
 
-RenderSettings ParsingJsonAndGetSetting(const Document& document){
+RenderSettings ParsingSettings(const Document& document){
 	assert(document.GetRoot().IsMap());
 	assert(document.GetRoot().AsMap().contains("render_settings"));
 	RenderSettings render_set;
@@ -129,7 +129,7 @@ void ParseAndPrintStatJsonDocument(const json::Document& document, const Transpo
 }
 
 Node SvgToJson(const json::Document& document,const transport_catalogue::TransportCatalogue& catalog,int id) {
-	const RenderSettings render_set = ParsingJsonAndGetSetting(document);
+	const RenderSettings render_set = ParsingSettings(document);
 	std::ostringstream temp;
 	DrawAllBusRoute(render_set, catalog,temp);
 	Dict dict;
