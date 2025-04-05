@@ -113,65 +113,75 @@ void JsonReader::ParsingSettings(){
 
 Node JsonReader::BusInfoToJson( const std::optional<BusInfo>& bus_info,int id) {
 	using namespace std::literals::string_literals;
-	json::Dict dict;
+	
+	json::Builder result{};
 	if (!bus_info) {
-		dict["request_id"s] = id;
-		dict["error_message"s] = "not found"s;
+		result.StartDict().Key("request_id").Value(id).
+			Key("error_message").Value("not found");
+			
 	}
 	else {
-		const auto& value=bus_info.value();
-		dict["curvature"s] = value.curvature,
-		dict["request_id"s] = id;
-		dict["route_length"s] = value.lenght;
-		dict["stop_count"s] =static_cast<int>(value.stops);
-		dict["unique_stop_count"s] = static_cast<int>(value.u_stops);
-
+		const auto& value = bus_info.value();
+		result.StartDict().Key("curvature").Value(value.curvature)
+			.Key("request_id").Value(id)
+			.Key("route_length").Value(value.lenght)
+			.Key("stop_count").Value(static_cast<int>(value.stops))
+			.Key("unique_stop_count").Value(static_cast<int>(value.u_stops));
+			
 	}
-	return Node(dict);
+	result.EndDict();
+	return result.Build();
 }
 
 Node JsonReader::StopInfoToJson(const std::optional<StopInfo>& stop, int id) {
 	using namespace std::literals::string_literals;
-	Dict dict;
+	
+	json::Builder result{};
 	if (!stop) {
-		dict["request_id"s] = id;
-		dict["error_message"s] = "not found"s;
+		result.StartDict().Key("request_id").Value(id)
+			.Key("error_message").Value("not found");
 	}
 	else {
-		dict["request_id"s] = id;
-		Array buses;
-		const auto& stop_value =*stop.value();
-		buses.reserve(stop_value.size());
+		result.StartDict().Key("request_id").Value(id)
+			.Key("buses").StartArray();
+		const auto& stop_value = *stop.value();
+		
 		for (const auto& bus : stop_value) {
-			buses.emplace_back(bus->name);
+			result.Value(bus->name);
 		}
-		dict["buses"] = std::move(buses);
+		result.EndArray();
 	}
-	return Node(dict);
+	result.EndDict();
+	return result.Build();
 }
 
 
 json::Document JsonReader::AnswerToJson() {
 	
 	assert(!stat_requests_.empty());
-	Array array;
+	//Array array;
+	json::Builder result{};
+	result.StartArray();
 	for (const auto &request : stat_requests_) {
 		if (request.type == "Bus") {
 			const std::optional<BusInfo> answer = catalog_.GetBusInfo(request.name);
-			array.emplace_back(BusInfoToJson( answer,request.id));
+			result.Value(BusInfoToJson(answer, request.id).GetValue());
+		
 		}
 		else if(request.type=="Stop"){
 			const std::optional<StopInfo> answer = catalog_.GetStopInfo(request.name);
-			array.emplace_back(StopInfoToJson(answer, request.id));
+			result.Value(StopInfoToJson(answer, request.id).GetValue());
+			
 		}
 		else {// request.type=="Map"
+			result.Value(SvgToJson(request.id).GetValue());
 			
-			array.emplace_back(SvgToJson(request.id));
 		}
+		
 	}
-	Document result_doc((Node(array)));
+	result.EndArray();
 	
-	return result_doc;
+	return Document(result.Build());
 }
 
 Node JsonReader::SvgToJson(int id) {
@@ -179,9 +189,9 @@ Node JsonReader::SvgToJson(int id) {
 	MapRendering render(this->render_set_, catalog_);
 	svg::Document &map = render.GetMap();
 	map.Render(temp);
-	Dict dict;
-	dict["request_id"] = id;
-	dict["map"] = temp.str();
-	return Node(dict);
+	json::Builder result{};
+	result.StartDict().Key("request_id").Value(id).Key("map").Value(temp.str()).EndDict();
+
+	return result.Build();
 }
 

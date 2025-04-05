@@ -20,7 +20,7 @@ std::vector<svg::Text> MapRendering::DrawBusText(std::string_view bus_name, cons
 
 	const std::vector<std::string_view> stops_name = catalog_.GetFinalStops(bus_name);
 	std::vector<svg::Text> text;
-	for (short int i = 0; i < stops_name.size(); ++i) {
+	for (short int i = 0; i < static_cast<short int>(stops_name.size()); ++i) {
 		svg::Point coord = projector(catalog_.GetStopCoordinates(stops_name.at(i)));
 		svg::Text temp;
 		temp.SetData(std::string(bus_name));
@@ -70,7 +70,7 @@ void MapRendering::ApplyRenderSettingsToBusRoute(std::vector<svg::Text>& text,in
 		t.SetFontWeight("bold");
 		});
 		
-	for (short int i = 1; i <=text.size(); ++i) {
+	for (short int i = 1; i <=static_cast<short int>(text.size()); ++i) {
 		if ((i%2)) {
 			auto& r_text = text.at(i-1);
 			r_text.SetFillColor(render_set_.underlayer_color);
@@ -121,7 +121,7 @@ MapRendering::MapRendering(const RenderSettings& render_settings, const transpor
 	for (const auto& bus : buses) {
 		auto text = DrawBusText(bus, projector);
 		ApplyRenderSettingsToBusRoute(text, number);
-		for (short int i = 0; i < text.size(); ++i) {
+		for (short int i = 0; i < static_cast<short int>(text.size()); ++i) {
 			map_.Add(text.at(i));
 		}
 		++number;

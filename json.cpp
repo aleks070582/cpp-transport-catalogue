@@ -97,6 +97,11 @@ namespace json {
         return as_variant_;
     }
 
+    Variant& Node::GetValue()
+    {
+        return as_variant_;
+    }
+
     // Реализация Document
 
     Document::Document(Node root) : root_(std::move(root)) {}

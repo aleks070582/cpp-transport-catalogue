@@ -18,7 +18,7 @@ namespace json {
     using Dict = std::map<std::string, Node>;
     using Array = std::vector<Node>;
     using Variant = std::variant<std::nullptr_t, Array, Dict, int, std::string, double, bool>;
-
+    
     // Ошибка парсинга JSON
     class ParsingError : public std::runtime_error {
     public:
@@ -38,6 +38,7 @@ namespace json {
     // Класс Node для представления узла JSON
     class Node {
     public:
+        using Value = Variant;
         Node() : as_variant_(nullptr) {}
         Node(Variant node) : as_variant_(std::move(node)) {}
         template<is_valid_type T>
@@ -67,6 +68,7 @@ namespace json {
 
         // Получение значения
         const Variant& GetValue() const;
+        Variant& GetValue();
 
     private:
         Variant as_variant_;
