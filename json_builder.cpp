@@ -20,7 +20,7 @@ namespace json {
         return std::move(root_);
     }
 
-    KeyCond Builder::Key(std::string key) {
+    KeyContext Builder::Key(std::string key) {
         Node::Value& host_value = GetCurrentValue();
 
         if (!std::holds_alternative<Dict>(host_value)) {
@@ -38,12 +38,12 @@ namespace json {
         return *this;
     }
 
-    StartDictCond Builder::StartDict() {
+    StartDictContext Builder::StartDict() {
         AddObject(Dict{}, /* one_shot */ false);
-        return StartDictCond(*this);
+        return StartDictContext(*this);
     }
 
-    StartArrayCond Builder::StartArray() {
+    StartArrayContext Builder::StartArray() {
         AddObject(Array{}, /* one_shot */ false);
         return *this;
     }
@@ -106,65 +106,65 @@ namespace json {
         }
     }
 
-   ValueKeyCond KeyCond::Value(Node::Value value)
+   ValueKeyContext KeyContext::Value(Node::Value value)
     {
         return builder_.Value(std::move(value));
     }
 
-    StartDictCond KeyCond::StartDict()
+    StartDictContext KeyContext::StartDict()
     {
         return builder_.StartDict();
     }
 
-    StartArrayCond KeyCond::StartArray()
+    StartArrayContext KeyContext::StartArray()
     {
         return builder_.StartArray();
 
     }
-    ValueArrayCond StartArrayCond::Value(Node::Value value)
+    ValueArrayContext StartArrayContext::Value(Node::Value value)
     {
         return builder_.Value(std::move(value));
     }
-    StartDictCond StartArrayCond::StartDict()
+    StartDictContext StartArrayContext::StartDict()
     {
         return builder_.StartDict();
     }
-    StartArrayCond StartArrayCond::StartArray()
+    StartArrayContext StartArrayContext::StartArray()
     {
         return builder_.StartArray();
     }
-    Builder& StartArrayCond::EndArray()
+    Builder& StartArrayContext::EndArray()
     {
         return builder_.EndArray();
     }
     
-    KeyCond ValueKeyCond::Key(std::string key)
+    KeyContext ValueKeyContext::Key(std::string key)
     {
         return builder_.Key(std::move(key));
     }
 
-    Builder& ValueKeyCond::EndDict()
+    Builder& ValueKeyContext::EndDict()
     {
         return builder_.EndDict();
     }
 
-    ValueArrayCond ValueArrayCond::Value(Node::Value value)
+    ValueArrayContext ValueArrayContext::Value(Node::Value value)
     {
         builder_.Value(std::move(value));
         return *this ;
     }
 
-    StartDictCond ValueArrayCond::StartDict()
+    StartDictContext ValueArrayContext::StartDict()
     {
         return builder_.StartDict();
     }
 
-    StartArrayCond ValueArrayCond::StartArray()
+    StartArrayContext ValueArrayContext::StartArray()
     {
         return builder_.StartArray();
     }
 
-    Builder& ValueArrayCond::EndArray()
+    Builder& ValueArrayContext::EndArray()
     {
         return builder_.EndArray();
     }
