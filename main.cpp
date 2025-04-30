@@ -4,6 +4,7 @@
 #include"fstream"
 #include"json_reader.h"
 #include"map_renderer.h"
+
     using namespace std;
     int main() {
         /*
@@ -14,10 +15,11 @@
          * Выполнить запросы к справочнику, находящиеся в массива "stat_requests", построив JSON-массив
          * с ответами Вывести в stdout ответы в виде JSON
          */
-        //fstream temp(std::cin);
-        json::Document document = json::Load(std::cin);
+        fstream temp("111.txt");
+        json::Document document = json::Load(temp);
         transport_catalogue::TransportCatalogue catalog;
-        JsonReader reader(document,catalog);
+        graph::DirectedWeightedGraph<double> graph;
+        JsonReader reader(document,catalog,graph);
         json::Print(reader.AnswerToJson(),std::cout);
         return 0;
     }
