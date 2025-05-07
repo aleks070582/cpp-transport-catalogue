@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graph.h"
-
+#include<iostream>
 #include <algorithm>
 #include <cassert>
 #include <cstdint>

@@ -34,7 +34,7 @@ namespace transport_router {
         int count = 0;
     };
 
-    class GraphCreater {
+    class TransportRouter {
 
         graph::DirectedWeightedGraph<double>& graph_;
         const tc::TransportCatalogue& catalog_;
@@ -47,12 +47,12 @@ namespace transport_router {
         void CreateAllVertexId();
         void CreateTranferEdges();
         void CreateBusesRouteEdges();
-    //    std::pair<double, int> GetWeightBetweenStops(size_t firs_id, size_t second_id, const tc:: Bus& bus);
         std::optional<graph::Router<double>> router_;
+        const double koef = 0.06;
     public:
-        GraphCreater(graph::DirectedWeightedGraph<double>& gr, const tc::TransportCatalogue& catalog,
-            double velosity, int wait_time) :graph_(gr), catalog_(catalog), wait_time_(wait_time),
-            velocity_(velosity) { };
+        TransportRouter(graph::DirectedWeightedGraph<double>& gr, const tc::TransportCatalogue& catalog,
+            double velocity, int wait_time) :graph_(gr), catalog_(catalog), wait_time_(wait_time),
+            velocity_(velocity) { };
         void AddCatalogToGraph();
         std::optional<std::pair<double, std::vector<EdgeInfo>>> FindRoute(std::string first, std::string second);
     };

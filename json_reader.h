@@ -14,6 +14,7 @@
 #include"domain.h"
 #include"graph.h"
 #include"transport_router.h"
+
 using StopInfo = const std::set<const transport_catalogue::Bus*, transport_catalogue::BusPointerComparator>*;
 struct StatRequest {
 	StatRequest() :id(0),type({}), name({}) {};
@@ -52,6 +53,6 @@ private:
 	std::vector<StatRequest> stat_requests_;
 	RenderSettings render_set_;
 	RoutingSettings routings_settings_;
-	std::optional<transport_router::GraphCreater> graph_creator_;
+	std::optional<transport_router::TransportRouter> graph_creator_;
 };
 

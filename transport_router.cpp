@@ -1,12 +1,12 @@
-#include "transport_router.h"
+﻿#include "transport_router.h"
 
 namespace transport_router {
- //   namespace tc= transport_catalogue;
+
     using namespace std;
     using namespace transport_catalogue;
 
 
-void GraphCreater::CreateAllVertexId() {
+void TransportRouter::CreateAllVertexId() {
     size_t id = 0;
    const deque<Stop>&stops = catalog_.GetAllStopRef();
     vertexes_id.reserve(stops.size() * 2);
@@ -20,7 +20,7 @@ void GraphCreater::CreateAllVertexId() {
 }
 
 
-void GraphCreater::CreateTranferEdges() {
+void TransportRouter::CreateTranferEdges() {
     for (const auto& [ids, stop_name] : vertex_by_id) {
         graph::Edge<double> edge;
         edge.from = ids.first;
@@ -33,25 +33,11 @@ void GraphCreater::CreateTranferEdges() {
         edge_info.second_stop = stop_name;
         edge_info.weight = wait_time_;
         edge_info_by_id[id] = edge_info;
-        // if(stop_name=="Sheremetyevo"||stop_name=="Khimki"){
-        //        cout << "wait " << id << " stop " << stop_name << " weight " << wait_time_ << endl;
-         //}
+        
+    }
+}
 
-    }
-}
-/*
-pair<double, int> GraphCreater::GetWeightBetweenStops(size_t first_id, size_t second_id, const tc::Bus& bus) {
-    int distance = 0;
-    int count = 0;
-    for (size_t i = first_id; i < second_id; ++i) {
-        distance += catalog_.GetDistanceBetweenNearestStops(bus.stops.at(i)->name, bus.stops.at(i + 1)->name);
-        ++count;
-    }
-    constexpr const double koefficient = 0.06;
-    return { (static_cast<double>(distance) / velocity_) * koefficient,count };
-}
-*/
-void GraphCreater::CreateBusesRouteEdges() {
+void TransportRouter::CreateBusesRouteEdges() {
   const  deque<transport_catalogue::Bus>& buses = catalog_.GetAllBusRef();
     for (const tc::Bus& bus : buses) {
         if (!bus.is_round_trip) {
@@ -64,7 +50,7 @@ void GraphCreater::CreateBusesRouteEdges() {
                 for (size_t ii = i + 1; ii <= reverse_stop; ++ii) {
                     total_weight += static_cast<double>(
                         catalog_.GetDistanceBetweenNearestStops(bus.stops[ii - 1]->name, bus.stops[ii]->name)
-                        ) / velocity_ * 0.06;
+                        ) / velocity_ * koef;
                     ++total_span;
 
                     const auto& first_stop_name = bus.stops.at(i)->name;
@@ -86,9 +72,7 @@ void GraphCreater::CreateBusesRouteEdges() {
                     edge_info.weight = total_weight;
                     edge_info.count = total_span;
                     edge_info_by_id[edge_id] = edge_info;
-                    //    if (bus.name == "2k") {
-                   // cout << "bus.name " << bus.name << " f_stop " << first_stop_name << " s_stop " << second_stop_name << " weight " << edge_info.weight << endl;
-                    //  }
+                   
                 }
             }
 
@@ -101,11 +85,9 @@ void GraphCreater::CreateBusesRouteEdges() {
                     const auto& second_stop_name = bus.stops.at(ii)->name;
                     total_weight += static_cast<double>(
                         catalog_.GetDistanceBetweenNearestStops(bus.stops[ii - 1]->name, bus.stops[ii]->name)
-                        ) / velocity_ * 0.06;
+                        ) / velocity_ * koef;
                     ++total_span;
 
-                    //     const auto& first_stop_name = bus.stops.at(i)->name;
-                    //     const auto& second_stop_name = bus.stops.at(ii)->name;
                     const auto& first_vertex_id = id_by_vertex.at(first_stop_name);
                     const auto& second_vertex_id = id_by_vertex.at(second_stop_name);
 
@@ -123,9 +105,7 @@ void GraphCreater::CreateBusesRouteEdges() {
                     edge_info.weight = total_weight;
                     edge_info.count = total_span;
                     edge_info_by_id[edge_id] = edge_info;
-                    //           if (bus.name == "2k"&& ed=="Sheremetyevo"||f) {
-                   // cout << "bus.name " << bus.name << " f_stop " << first_stop_name << " s_stop " << second_stop_name << " weight " << edge_info.weight << endl;
-                    //          }
+                   
                 }
             }
 
@@ -138,7 +118,7 @@ void GraphCreater::CreateBusesRouteEdges() {
                 for (size_t ii = i + 1; ii < bus.stops.size(); ++ii) {
                     total_weight += static_cast<double>(
                         catalog_.GetDistanceBetweenNearestStops(bus.stops[ii - 1]->name, bus.stops[ii]->name)
-                        ) / velocity_ * 0.06;
+                        ) / velocity_ * koef;
                     ++total_span;
 
                     const auto& first_stop_name = bus.stops.at(i)->name;
@@ -160,9 +140,7 @@ void GraphCreater::CreateBusesRouteEdges() {
                     edge_info.weight = total_weight;
                     edge_info.count = total_span;
                     edge_info_by_id[edge_id] = edge_info;
-                    //        if (bus.name == "2k") {
-                   // cout << "bus.name " << bus.name << " f_stop " << first_stop_name << " s_stop " << second_stop_name << " weight " << edge_info.weight << endl;
-                    //       }
+                 
                 }
             }
 
@@ -173,7 +151,7 @@ void GraphCreater::CreateBusesRouteEdges() {
             edge.from = first_vertex_id.second;
             edge.to = first_vertex_id.first;
             edge.weight = catalog_.CalculatePath(bus.name);
-            edge.weight = (edge.weight / velocity_) * 0.06;
+            edge.weight = (edge.weight / velocity_) * koef;
             size_t edge_id = graph_.AddEdge(edge);
 
             EdgeInfo edge_info;
@@ -183,24 +161,18 @@ void GraphCreater::CreateBusesRouteEdges() {
             edge_info.bus = bus.name;
             edge_info.weight = edge.weight;
             edge_info_by_id[edge_id] = edge_info;
-            //    if (bus.name == "2k") {
-        //    cout << "bus.name " << bus.name << " f_stop " << first_stop_name << " s_stop " << edge_info.second_stop << " weight " << edge_info.weight << endl;
-            //   }
+        
         }
     }
 }
-void GraphCreater::AddCatalogToGraph() {
-    //  cout << "vertex" << endl;
+void TransportRouter::AddCatalogToGraph() {
     CreateAllVertexId();
-    //   cout << "waitedges" << endl;
     CreateTranferEdges();
-    //   cout << "buses_roue" << endl;
     CreateBusesRouteEdges();
-    //   cout << "create_route" << endl;
     router_.emplace(graph_);
 }
 
-std::optional<std::pair<double, std::vector<EdgeInfo>>> GraphCreater::FindRoute(std::string first, std::string second)
+std::optional<std::pair<double, std::vector<EdgeInfo>>> TransportRouter::FindRoute(std::string first, std::string second)
 {
     if (!router_) {
         throw std::logic_error("Router has not been initialized");
