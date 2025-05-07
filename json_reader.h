@@ -13,7 +13,7 @@
 #include<sstream>
 #include"domain.h"
 #include"graph.h"
-
+#include"transport_router.h"
 using StopInfo = const std::set<const transport_catalogue::Bus*, transport_catalogue::BusPointerComparator>*;
 struct StatRequest {
 	StatRequest() :id(0),type({}), name({}) {};
@@ -37,7 +37,7 @@ private:
 	JsonReader() = delete;
 	json::Node SvgToJson( int id);
 	svg::Color ParseColorFromJson(const json::Node& node);
-	json::Node RouteToJson(std::optional<std::pair<double, std::vector<transport_catalogue::EdgeInfo>>>value,int id);
+	json::Node RouteToJson(std::optional<std::pair<double, std::vector<transport_router::EdgeInfo>>>value,int id);
 	void ParsingSettings();
 	json::Node BusInfoToJson(const std::optional<transport_catalogue::BusInfo>& bus_info, int id);
 	json::Node StopInfoToJson(const std::optional< StopInfo>& stop, int id);
@@ -52,6 +52,6 @@ private:
 	std::vector<StatRequest> stat_requests_;
 	RenderSettings render_set_;
 	RoutingSettings routings_settings_;
-	std::optional<transport_catalogue::GraphCreater> graph_creator_;
+	std::optional<transport_router::GraphCreater> graph_creator_;
 };
 

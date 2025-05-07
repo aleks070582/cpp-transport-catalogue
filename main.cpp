@@ -15,8 +15,8 @@
          * Выполнить запросы к справочнику, находящиеся в массива "stat_requests", построив JSON-массив
          * с ответами Вывести в stdout ответы в виде JSON
          */
-        fstream temp("111.txt");
-        json::Document document = json::Load(temp);
+       // fstream temp("112.txt");
+        json::Document document = json::Load(cin);
         transport_catalogue::TransportCatalogue catalog;
         graph::DirectedWeightedGraph<double> graph;
         JsonReader reader(document,catalog,graph);

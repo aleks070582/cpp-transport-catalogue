@@ -96,7 +96,7 @@ svg::Color JsonReader::ParseColorFromJson(const Node& node)
 }
 
 json::Node JsonReader::RouteToJson(
-	std::optional<std::pair<double, std::vector<transport_catalogue::EdgeInfo>>> opt,
+	std::optional<std::pair<double, std::vector<transport_router::EdgeInfo>>> opt,
 	int id)
 {
 	if (!opt.has_value()) {

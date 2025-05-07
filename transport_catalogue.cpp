@@ -1,4 +1,4 @@
-﻿#include "transport_catalogue.h"
+#include "transport_catalogue.h"
 #include<iostream>
 
 namespace transport_catalogue {
@@ -147,6 +147,23 @@ namespace transport_catalogue {
           return result;
       }
 
+      const std::deque<Bus>& TransportCatalogue::GetAllBusRef() const
+      {
+          return buses;
+      }
+
+      int TransportCatalogue::CalculatePath(std::string_view name) const
+      {
+          Bus* p_bus = p_to_bus.at(name);
+
+          return CalculatePath(p_bus);
+      }
+
+      const std::deque<Stop>& TransportCatalogue::GetAllStopRef() const
+      {
+          return stops;
+      }
+
      
     double TransportCatalogue::CalculateGeographicPath(const Bus* p_bus) const {
         if (p_bus->stops.size() < 2) {
@@ -182,7 +199,7 @@ namespace transport_catalogue {
     }
     
     
-
+/*
     void GraphCreater::CreateAllVertexId() {
         size_t id = 0;
         vertexes_id.reserve(catalog_.stops.size() * 2);
@@ -262,7 +279,7 @@ namespace transport_catalogue {
                         edge_info.count = total_span;
                         edge_info_by_id[edge_id] = edge_info;
                    //    if (bus.name == "2k") {
-                      //      cout << "bus.name " << bus.name << " f_stop " << first_stop_name << " s_stop " << second_stop_name << " weight " << edge_info.weight << endl;
+                            cout << "bus.name " << bus.name << " f_stop " << first_stop_name << " s_stop " << second_stop_name << " weight " << edge_info.weight << endl;
                       //  }
                     }
                 }
@@ -299,7 +316,7 @@ namespace transport_catalogue {
                         edge_info.count = total_span;
                         edge_info_by_id[edge_id] = edge_info;
              //           if (bus.name == "2k"&& ed=="Sheremetyevo"||f) {
-                 //           cout << "bus.name " << bus.name << " f_stop " << first_stop_name << " s_stop " << second_stop_name << " weight " << edge_info.weight << endl;
+                           cout << "bus.name " << bus.name << " f_stop " << first_stop_name << " s_stop " << second_stop_name << " weight " << edge_info.weight << endl;
               //          }
                     }
                 }
@@ -336,7 +353,7 @@ namespace transport_catalogue {
                         edge_info.count = total_span;
                         edge_info_by_id[edge_id] = edge_info;
                 //        if (bus.name == "2k") {
-                //           cout << "bus.name " << bus.name << " f_stop " << first_stop_name << " s_stop " << second_stop_name << " weight " << edge_info.weight << endl;
+                           cout << "bus.name " << bus.name << " f_stop " << first_stop_name << " s_stop " << second_stop_name << " weight " << edge_info.weight << endl;
                  //       }
                     }
                 }
@@ -359,7 +376,7 @@ namespace transport_catalogue {
                 edge_info.weight = edge.weight;
                 edge_info_by_id[edge_id] = edge_info;
             //    if (bus.name == "2k") {
-           //        cout << "bus.name " << bus.name << " f_stop " << first_stop_name << " s_stop " << edge_info.second_stop << " weight " << edge_info.weight << endl;
+                   cout << "bus.name " << bus.name << " f_stop " << first_stop_name << " s_stop " << edge_info.second_stop << " weight " << edge_info.weight << endl;
              //   }
             }
         }
@@ -403,5 +420,5 @@ namespace transport_catalogue {
     }
 
    
-
+   */
 }

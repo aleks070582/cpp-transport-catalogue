@@ -1,7 +1,7 @@
 #pragma once
 
 #include "graph.h"
-#include<iostream>
+
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -87,7 +87,7 @@ namespace graph {
             std::vector<std::optional<RouteInternalData>>(graph.GetVertexCount()))
     {
         InitializeRoutesInternalData(graph);
-    //    std::cout << "router"<<std::endl;
+
         const size_t vertex_count = graph.GetVertexCount();
         for (VertexId vertex_through = 0; vertex_through < vertex_count; ++vertex_through) {
             RelaxRoutesInternalDataThroughVertex(vertex_count, vertex_through);

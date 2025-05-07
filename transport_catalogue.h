@@ -1,4 +1,4 @@
-#pragma once
+
 
 #pragma once
 #include <deque>
@@ -10,15 +10,15 @@
 #include <algorithm>
 #include <utility>
 #include "geo.h"
-#include"graph.h"
 #include <unordered_set>
 #include <optional>
 #include <set>
 #include<stdexcept>
 #include<variant>
-#include"router.h"
+
 
 namespace transport_catalogue {
+   
     struct Bus;
     struct Stop;
 
@@ -63,7 +63,7 @@ namespace transport_catalogue {
         }
     };
     class TransportCatalogue {
-        friend class GraphCreater;
+      
     public:
         TransportCatalogue() {
             
@@ -80,7 +80,9 @@ namespace transport_catalogue {
         std::vector<std::string_view> GetFinalStops(std::string_view bus_name) const;
         std::vector<const Stop*> GetAllStopWithBus() const;
         int GetDistanceBetweenNearestStops(std::string_view first, std::string_view second) const;
-       
+        const std::deque<Bus>& GetAllBusRef() const;
+        int CalculatePath(std::string_view name) const;
+        const std::deque<Stop>& GetAllStopRef()const;
         
     private:
 
@@ -96,53 +98,13 @@ namespace transport_catalogue {
     };
     struct StringPairHash {
         size_t operator()(const std::pair<std::string, std::string>& p) const {
-            // Хэшируем первую строку
             size_t h1 = std::hash<std::string>{}(p.first);
-            // Хэшируем вторую строку
             size_t h2 = std::hash<std::string>{}(p.second);
 
-            // Комбинируем хэши (можно использовать boost::hash_combine или аналогичную логику)
-            return h1 ^ (h2 << 1); // Простейший способ комбинации
-        }
-    };
-    struct SizeTPairHash {
-        size_t operator()(const std::pair<size_t, size_t>& p) const {
-            size_t h1 = std::hash<size_t>{}(p.first);
-            size_t h2 = std::hash<size_t>{}(p.second);
             return h1 ^ (h2 << 1); 
         }
     };
-    struct EdgeInfo {
-        std::string_view first_stop;
-        std::string_view second_stop;
-        double weight=0;
-        std::string_view bus;
-        int count = 0;
-    };
-
-    class GraphCreater {
-        
-        graph::DirectedWeightedGraph<double>& graph_;
-        const TransportCatalogue& catalog_;
-        const int wait_time_;
-        const double velocity_;
-        std::unordered_map<std::string_view, std::pair<size_t,size_t>> id_by_vertex;
-        std::unordered_map<std::pair<size_t,size_t>, std::string_view,SizeTPairHash> vertex_by_id;
-        std::vector<size_t> vertexes_id;
-        std::unordered_map<size_t, EdgeInfo> edge_info_by_id;
-        void CreateAllVertexId();
-        void CreateTranferEdges();
-        void CreateBusesRouteEdges();
-        std::pair<double,int> GetWeightBetweenStops(size_t firs_id, size_t second_id, const Bus& bus);
-        std::optional<graph::Router<double>> router_;
-    public:
-        GraphCreater(graph::DirectedWeightedGraph<double>&gr, const TransportCatalogue& catalog,double velosity,int wait_time) :graph_(gr), catalog_(catalog),
-            wait_time_(wait_time), velocity_(velosity) {
-          
-        };
-        void AddCatalogToGraph();
-        std::optional<std::pair<double,std::vector<EdgeInfo>>> FindRoute(std::string first, std::string second);
-    };
+   
 
 
 }
