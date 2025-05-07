@@ -2,7 +2,7 @@
 using namespace transport_catalogue;
 using namespace json;
 
-JsonReader::JsonReader(const Document& document,transport_catalogue::TransportCatalogue&catalog,graph::DirectedWeightedGraph<double>&grap) : catalog_(catalog), document_(document),graph_(grap) {
+JsonReader::JsonReader(const Document& document,transport_catalogue::TransportCatalogue&catalog) : catalog_(catalog), document_(document) {
 	assert(document_.GetRoot().IsMap());
 	const Node requests = document_.GetRoot().AsMap().find("base_requests")->second;
 	assert(requests.IsArray());
@@ -96,7 +96,7 @@ svg::Color JsonReader::ParseColorFromJson(const Node& node)
 }
 
 json::Node JsonReader::RouteToJson(
-	std::optional<std::pair<double, std::vector<transport_router::EdgeInfo>>> opt,
+	std::optional<transport_router::Route> opt,
 	int id)
 {
 	if (!opt.has_value()) {
@@ -108,11 +108,11 @@ json::Node JsonReader::RouteToJson(
 			.Build();
 	}
 
-	const auto& edges = opt->second;
+	const auto& edges = opt.value().edges_info;
 	json::Builder result;
 	result.StartDict()
 		.Key("request_id").Value(id)
-		.Key("total_time").Value(opt.value().first)
+		.Key("total_time").Value(opt.value().distance)
 		.Key("items").StartArray();
 
 	for (size_t i = 0; i < edges.size(); ++i) {
@@ -171,8 +171,10 @@ void JsonReader::ParsingSettings(){
 		rc.velocity = render_seetings.at("bus_velocity").AsDouble();
 		rc.bus_wait_time = render_seetings.at("bus_wait_time").AsInt();
 		routings_settings_ = rc;
-		graph_creator_.emplace(graph_, catalog_, rc.velocity, rc.bus_wait_time);
-		graph_creator_->AddCatalogToGraph();
+	
+		
+		graph_creator_.emplace( catalog_, rc.velocity, rc.bus_wait_time);
+		//graph_creator_->AddCatalogToGraph();
 	}
 
 

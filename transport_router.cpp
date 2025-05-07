@@ -172,7 +172,13 @@ void TransportRouter::AddCatalogToGraph() {
     router_.emplace(graph_);
 }
 
-std::optional<std::pair<double, std::vector<EdgeInfo>>> TransportRouter::FindRoute(std::string first, std::string second)
+TransportRouter::TransportRouter(const tc::TransportCatalogue& catalog, double velocity, int wait_time) : 
+    catalog_(catalog), wait_time_(wait_time), velocity_(velocity)
+{
+    AddCatalogToGraph();
+}
+
+std::optional<Route> TransportRouter::FindRoute(std::string first, std::string second)
 {
     if (!router_) {
         throw std::logic_error("Router has not been initialized");
@@ -196,7 +202,7 @@ std::optional<std::pair<double, std::vector<EdgeInfo>>> TransportRouter::FindRou
         return value.weight == 0.0;
         });
 
-    return make_pair(info.weight, r_v);
+    return Route(info.weight, r_v );
 }
 
 

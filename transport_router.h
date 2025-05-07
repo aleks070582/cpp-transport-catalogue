@@ -33,10 +33,14 @@ namespace transport_router {
         std::string_view bus;
         int count = 0;
     };
+    struct Route {
+        double distance;
+        std::vector<EdgeInfo> edges_info;
+    };
 
     class TransportRouter {
 
-        graph::DirectedWeightedGraph<double>& graph_;
+      
         const tc::TransportCatalogue& catalog_;
         const int wait_time_;
         const double velocity_;
@@ -49,11 +53,11 @@ namespace transport_router {
         void CreateBusesRouteEdges();
         std::optional<graph::Router<double>> router_;
         const double koef = 0.06;
-    public:
-        TransportRouter(graph::DirectedWeightedGraph<double>& gr, const tc::TransportCatalogue& catalog,
-            double velocity, int wait_time) :graph_(gr), catalog_(catalog), wait_time_(wait_time),
-            velocity_(velocity) { };
+        graph::DirectedWeightedGraph<double> graph_;
         void AddCatalogToGraph();
-        std::optional<std::pair<double, std::vector<EdgeInfo>>> FindRoute(std::string first, std::string second);
+    public:
+        TransportRouter( const tc::TransportCatalogue& catalog, double velocity, int wait_time) ;
+       
+        std::optional<Route> FindRoute(std::string first, std::string second);
     };
 }
