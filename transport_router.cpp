@@ -178,7 +178,7 @@ TransportRouter::TransportRouter(const tc::TransportCatalogue& catalog, double v
     AddCatalogToGraph();
 }
 
-std::optional<Route> TransportRouter::FindRoute(std::string first, std::string second)
+std::optional<Route> TransportRouter::FindRoute(const std::string& first, const std::string& second)
 {
     if (!router_) {
         throw std::logic_error("Router has not been initialized");

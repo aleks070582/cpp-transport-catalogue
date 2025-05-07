@@ -58,6 +58,6 @@ namespace transport_router {
     public:
         TransportRouter( const tc::TransportCatalogue& catalog, double velocity, int wait_time) ;
        
-        std::optional<Route> FindRoute(std::string first, std::string second);
+        std::optional<Route> FindRoute(const std::string& first,const  std::string& second);
     };
 }
